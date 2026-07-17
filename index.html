@@ -7,36 +7,43 @@
     <style>
         body {
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            box-sizing: border-box;
+            height: 100vh;
+            overflow: hidden; /* Полностью убираем любые скроллбары */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #2c3e50;
             display: flex;
             flex-direction: column;
             align-items: center;
             color: #ecf0f1;
-            /* Скрываем горизонтальный скролл, чтобы камера не растягивала страницу при выходе за края */
-            overflow-x: hidden; 
+        }
+
+        h1 {
+            margin: 5px 0;
+            font-size: 26px;
         }
 
         .instructions {
             background-color: #34495e;
-            padding: 15px 25px;
+            padding: 10px 20px;
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             max-width: 800px;
             text-align: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            font-size: 15px;
         }
 
         .control-btn {
             background-color: #8e44ad;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 20px;
             border-radius: 8px;
             font-size: 14px;
             cursor: pointer;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             transition: background 0.3s;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
@@ -70,22 +77,19 @@
 
         #game-container {
             position: relative;
-            width: 95vw; /* Используем 95% ширины экрана */
-            /* Умное ограничение ширины: игра становится шире на больших экранах, 
-               но привязана к высоте экрана (75vh * соотношение сторон 1.75), 
-               чтобы не появлялся вертикальный скролл. */
-            max-width: min(1400px, calc(75vh * 1.75));
-            /* УБРАЛИ overflow: hidden; чтобы камера не обрезалась на краях картинки! */
+            width: 100%;
+            /* Умная адаптивность: ширина зависит либо от экрана (95vw), либо от доступной высоты (100vh минус место под заголовки ~160px) */
+            max-width: min(95vw, calc((100vh - 160px) * 1.75));
+            aspect-ratio: 1792 / 1024; /* Сохраняем пропорции фото */
             cursor: none; 
         }
 
         #main-image {
             display: block;
             width: 100%;
-            height: auto;
+            height: 100%;
             user-select: none;
             filter: brightness(60%); 
-            /* Перенесли скругление углов и тень с контейнера на само изображение */
             border-radius: 16px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
@@ -168,7 +172,7 @@
 
         #crosshair {
             position: absolute;
-            top: 50%;
+            top: 56%; /* Опустили прицел чуть ниже (было 50%) */
             left: 50%;
             transform: translate(-50%, -50%);
             width: 30px;
@@ -320,25 +324,6 @@
             } else {
                 toggleZonesBtn.textContent = "Show hints";
             }
-        });
-
-        container.addEventListener('mousedown', (e) => {
-            if(!document.body.classList.contains('show-zones')) return;
-            
-            const rect = mainImg.getBoundingClientRect();
-            let percentX = ((e.clientX - rect.left) / rect.width) * 100;
-            let percentY = ((e.clientY - rect.top) / rect.height) * 100;
-            
-            percentX = Math.max(0, Math.min(100, Math.round(percentX)));
-            percentY = Math.max(0, Math.min(100, Math.round(percentY)));
-            
-            messageBox.textContent = `x: ${percentX}, y: ${percentY}`;
-            messageBox.classList.add('visible');
-            
-            clearTimeout(messageTimeout);
-            messageTimeout = setTimeout(() => {
-                messageBox.classList.remove('visible');
-            }, 6000);
         });
 
         function initCamera() {

@@ -14,7 +14,8 @@
             flex-direction: column;
             align-items: center;
             color: #ecf0f1;
-            overflow-x: hidden;
+            /* Скрываем горизонтальный скролл, чтобы камера не растягивала страницу при выходе за края */
+            overflow-x: hidden; 
         }
 
         .instructions {
@@ -24,9 +25,9 @@
             margin-bottom: 20px;
             max-width: 800px;
             text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        /* --- НОВЫЕ СТИЛИ ДЛЯ КЛИКАБЕЛЬНЫХ ЗОН И ПОДСКАЗОК --- */
         .control-btn {
             background-color: #8e44ad;
             color: white;
@@ -46,10 +47,10 @@
         #message-box {
             position: absolute;
             top: 20px;
-            left: 20px; /* Переместили в левый угол */
-            transform: none; /* Убрали центрирование, которое было раньше */
+            left: 20px; 
+            transform: none; 
             background-color: rgba(44, 62, 80, 0.95);
-            color: #f1c40f; /* Желтый цвет текста для контраста */
+            color: #f1c40f; 
             padding: 15px 30px;
             border-radius: 12px;
             border: 2px solid #f1c40f;
@@ -57,14 +58,36 @@
             font-weight: bold;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
             opacity: 0;
-            pointer-events: none; /* Чтобы не мешал кликать сквозь него */
+            pointer-events: none; 
             transition: opacity 0.3s ease-in-out;
-            z-index: 100; /* Поверх всех слоев камеры */
-            text-align: left; /* Текст теперь тоже выровнен по левому краю */
+            z-index: 100; 
+            text-align: left; 
             min-width: 300px;
         }
         #message-box.visible {
             opacity: 1;
+        }
+
+        #game-container {
+            position: relative;
+            width: 95vw; /* Используем 95% ширины экрана */
+            /* Умное ограничение ширины: игра становится шире на больших экранах, 
+               но привязана к высоте экрана (75vh * соотношение сторон 1.75), 
+               чтобы не появлялся вертикальный скролл. */
+            max-width: min(1400px, calc(75vh * 1.75));
+            /* УБРАЛИ overflow: hidden; чтобы камера не обрезалась на краях картинки! */
+            cursor: none; 
+        }
+
+        #main-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            user-select: none;
+            filter: brightness(60%); 
+            /* Перенесли скругление углов и тень с контейнера на само изображение */
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         #hotspots-container {
@@ -73,38 +96,29 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 5; /* Над картинкой, но под самой камерой */
+            z-index: 5; 
         }
 
         .hotspot {
             position: absolute;
             transform: translate(-50%, -50%);
-            border-radius: 50%; /* Делаем зоны овальными/круглыми */
+            border-radius: 50%; 
             cursor: pointer;
-            background-color: transparent; /* Невидимые в режиме игры */
+            background-color: transparent; 
         }
 
-        /* Режим настройки (когда нажата кнопка) */
-        
-        /* 1. Возвращаем обычный курсор-стрелку */
         body.show-zones #game-container {
             cursor: default; 
         }
-
-        /* 2. Прячем камеру и миникарту */
         body.show-zones #camera-assembly,
         body.show-zones #minimap {
             display: none;
         }
-
-        /* 3. Убираем желтый цвет, оставляем только центрирование для текста */
         body.show-zones .hotspot {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
-        /* 4. Оформляем саму белую плашку с текстом */
         body.show-zones .hotspot::after {
             content: attr(data-id);
             color: #000;
@@ -115,75 +129,43 @@
             border-radius: 6px;
             border: 1px solid #ccc;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            pointer-events: none; /* Чтобы клик проходил точно по зоне, а не по тексту */
-        }
-        /* --- КОНЕЦ НОВЫХ СТИЛЕЙ --- */
-
-        #game-container {
-            position: relative;
-            width: 100%;
-            max-width: 1024px;
-            border-radius: 16px;
-            overflow: hidden; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            cursor: none; 
+            pointer-events: none; 
         }
 
-        /* 1. Главная картинка-фон */
-        #main-image {
-            display: block;
-            width: 100%;
-            height: auto;
-            user-select: none;
-            filter: brightness(60%); /* Делаем фон темнее, чтобы лупа выделялась */
-        }
-
-        /* 2. Контейнер для камеры */
         #camera-assembly {
             position: absolute;
             top: 0;
             left: 0;
-            width: 550px; /* СДЕЛАЛИ КАМЕРУ БОЛЬШЕ (было 450px) */
-            /* Пропорции вашей картинки камеры */
+            width: 550px; 
             aspect-ratio: 1792 / 1024;
             pointer-events: none;
             will-change: transform;
             z-index: 10;
         }
 
-        /* 3. Экран камеры (ЗУМ) */
         #camera-screen {
             position: absolute;
             z-index: 11;
-            
-            /* УМЕНЬШИЛИ ЭКРАН И СПРЯТАЛИ ЕГО ГЛУБЖЕ, чтобы он не торчал из-под камеры */
-            /* Центрируем его ровно по центру корпуса */
             left: 12%;   
             top: 17%;    
             width: 76%;  
             height: 66%; 
-            
             background-image: url('https://i.postimg.cc/ZKVgH9hB/Gemini-Generated-Image-sgesx3sgesx3sges.png');
             background-repeat: no-repeat;
-            
             border-radius: 15%; 
             overflow: hidden;
-            
             will-change: background-position, background-size;
         }
 
-        /* 4. Картинка самого корпуса камеры */
         #camera-body {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 12; /* Корпус кладется ПОВЕРХ зум-экрана */
-            /* УБРАЛИ OPACITY, теперь корпус камеры абсолютно плотный и не просвечивает! */
+            z-index: 12; 
         }
 
-        /* Прицел */
         #crosshair {
             position: absolute;
             top: 50%;
@@ -207,18 +189,19 @@
             border-radius: 50%;
         }
 
-        /* Видоискатель (миникарта) */
         #minimap {
             position: absolute;
             z-index: 20;
             top: 20px; 
-            left: 20px; 
+            /* Переместили направо, чтобы миникарта не перекрывала сообщение (message-box) */
+            right: 20px; 
             width: 120px; 
             border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 8px;
             overflow: hidden;
             pointer-events: none;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            background-color: #000;
         }
         #minimap img {
             display: block;
@@ -243,27 +226,17 @@
         <strong>How to play:</strong> Find the animals and make sentences with <em>this, that, these, those</em>. For example: <em>"This is a monkey."</em>
     </div>
 
-    <!-- Кнопка для настройки зон (Убрали русский) -->
     <button id="toggle-zones-btn" class="control-btn">Show hints</button>
 
     <div id="game-container">
-        <!-- Всплывающее сообщение с предложением -->
         <div id="message-box"></div>
-
-        <!-- Контейнер для невидимых зон клика -->
         <div id="hotspots-container"></div>
 
         <img id="main-image" src="https://i.postimg.cc/ZKVgH9hB/Gemini-Generated-Image-sgesx3sgesx3sges.png" alt="Джунгли">
         
         <div id="camera-assembly">
-            <!-- Зум-экран теперь лежит в основе и занимает 90% места -->
             <div id="camera-screen"></div>
-            
-            <!-- Картинка камеры (ПОВЕРХ экрана) с прозрачной дыркой по центру -->
-            <!-- Заменил на картинку бинокля, так как у последней камеры была черная заливка по краям -->
-            <!-- Если хотите вернуть ту черную камеру, вставьте ее ссылку сюда -->
             <img id="camera-body" src="https://i.postimg.cc/44jStnTN/Chat-GPT-Image-16-iul-2026-g-23-45-37.png" alt="Камера">
-            
             <div id="crosshair"></div>
         </div>
 
@@ -281,19 +254,15 @@
         const minimap = document.getElementById('minimap');
         const minimapFrame = document.getElementById('minimap-frame');
         
-        // НОВЫЕ ПЕРЕМЕННЫЕ ДЛЯ ЗОН И СООБЩЕНИЙ (Исправлено)
         const toggleZonesBtn = document.getElementById('toggle-zones-btn');
         const messageBox = document.getElementById('message-box');
         const hotspotsContainer = document.getElementById('hotspots-container');
 
-        const ZOOM = 1.15; // Легкий зум
+        const ZOOM = 1.15;
 
-        // Переменные для точных расчетов
-        let screenW = 0, screenH = 0;
-        let screenCenterX = 0, screenCenterY = 0;
         let camW = 0, camH = 0;
+        let messageTimeout;
 
-        // СПИСОК ЖИВОТНЫХ: (Обновленные координаты)
         const animals = [
             { id: "butterflies", text: "These are butterflies.", x: 92, y: 80, size: 6 },
             { id: "elephant", text: "This is an elephant.", x: 60, y: 75, size: 14 },
@@ -309,9 +278,6 @@
             { id: "tiger", text: "That is a tiger.", x: 10, y: 65, size: 10 }
         ];
 
-        let messageTimeout;
-
-        // Создаем кликабельные зоны для животных
         animals.forEach(animal => {
             const spot = document.createElement('div');
             spot.classList.add('hotspot');
@@ -321,27 +287,32 @@
             spot.style.height = animal.size + '%'; 
             spot.dataset.id = animal.id;
             
-            // Обработка клика по животному
             spot.addEventListener('mousedown', (e) => {
-                // ИСПРАВЛЕНИЕ ЛАГА: Теперь предложения появляются всегда, 
-                // даже если вы играете с включенными желтыми зонами!
                 messageBox.textContent = animal.text;
                 messageBox.classList.add('visible');
                 
-                // Прячем сообщение через 4 секунды
                 clearTimeout(messageTimeout);
                 messageTimeout = setTimeout(() => {
                     messageBox.classList.remove('visible');
                 }, 4000);
                 
-                // Останавливаем клик, чтобы не сработал клик по фону-помощнику
                 e.stopPropagation();
             });
+
+            // Поддержка касаний для мобильных устройств
+            spot.addEventListener('touchstart', (e) => {
+                messageBox.textContent = animal.text;
+                messageBox.classList.add('visible');
+                clearTimeout(messageTimeout);
+                messageTimeout = setTimeout(() => {
+                    messageBox.classList.remove('visible');
+                }, 4000);
+                e.stopPropagation();
+            }, {passive: true});
             
             hotspotsContainer.appendChild(spot);
         });
 
-        // Работа кнопки показа зон (Убрали всплывающую подсказку)
         toggleZonesBtn.addEventListener('click', () => {
             document.body.classList.toggle('show-zones');
             if(document.body.classList.contains('show-zones')) {
@@ -351,7 +322,6 @@
             }
         });
 
-        // ПОМОЩНИК: Клик по картинке в режиме настройки показывает точные координаты
         container.addEventListener('mousedown', (e) => {
             if(!document.body.classList.contains('show-zones')) return;
             
@@ -359,11 +329,8 @@
             let percentX = ((e.clientX - rect.left) / rect.width) * 100;
             let percentY = ((e.clientY - rect.top) / rect.height) * 100;
             
-            percentX = Math.round(percentX);
-            percentY = Math.round(percentY);
-            
-            percentX = Math.max(0, Math.min(100, percentX));
-            percentY = Math.max(0, Math.min(100, percentY));
+            percentX = Math.max(0, Math.min(100, Math.round(percentX)));
+            percentY = Math.max(0, Math.min(100, Math.round(percentY)));
             
             messageBox.textContent = `x: ${percentX}, y: ${percentY}`;
             messageBox.classList.add('visible');
@@ -380,6 +347,7 @@
             
             const rect = mainImg.getBoundingClientRect();
             if (rect.width > 0) {
+                // Центрируем камеру при инициализации
                 updateCamera({
                     clientX: rect.left + rect.width / 2,
                     clientY: rect.top + rect.height / 2
@@ -389,33 +357,41 @@
 
         function updateCamera(e) {
             const rect = mainImg.getBoundingClientRect();
-            let x = e.clientX - rect.left;
-            let y = e.clientY - rect.top;
+            
+            // Поддержка как мыши, так и тач-событий
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+                // Предотвращаем скролл экрана при ведении пальцем по камере
+                e.preventDefault(); 
+            } else if (clientX === undefined) {
+                return; // Безопасный выход, если событие не содержит координат
+            }
+
+            let x = clientX - rect.left;
+            let y = clientY - rect.top;
 
             x = Math.max(0, Math.min(x, rect.width));
             y = Math.max(0, Math.min(y, rect.height));
 
-            // Двигаем камеру (центр сборки = курсор)
             const moveX = x - (camW / 2);
             const moveY = y - (camH / 2);
             cameraAssembly.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
 
-            // Зум: растягиваем фон
             const bgWidth = rect.width * ZOOM;
             const bgHeight = rect.height * ZOOM;
             cameraScreen.style.backgroundSize = `${bgWidth}px ${bgHeight}px`;
 
-            // Сдвигаем увеличенный фон так, чтобы фокус был всегда в центре камеры
-            // Используем новые размеры экрана (76% и 66%), которые мы задали в CSS
-            const screenW = camW * 0.76;
-            const screenH = camH * 0.66;
+            const localScreenW = camW * 0.76;
+            const localScreenH = camH * 0.66;
             
-            const bgPosX = (screenW / 2) - (x * ZOOM);
-            const bgPosY = (screenH / 2) - (y * ZOOM);
+            const bgPosX = (localScreenW / 2) - (x * ZOOM);
+            const bgPosY = (localScreenH / 2) - (y * ZOOM);
             
             cameraScreen.style.backgroundPosition = `${bgPosX}px ${bgPosY}px`;
 
-            // Миникарта
             const scaleX = minimap.offsetWidth / rect.width;
             const scaleY = minimap.offsetHeight / rect.height;
 
@@ -431,8 +407,11 @@
         }
 
         container.addEventListener('mousemove', updateCamera);
+        // Добавлены обработчики для Touch-устройств (с passive: false для preventDefault)
+        container.addEventListener('touchmove', updateCamera, {passive: false});
+        container.addEventListener('touchstart', updateCamera, {passive: false});
+        
         window.addEventListener('resize', initCamera);
-
         window.onload = initCamera;
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jungle Photo Safari</title>
+    <title>In the jungle</title>
     <style>
         body {
             margin: 0;
@@ -77,17 +77,20 @@
 
         #game-container {
             position: relative;
-            width: 100%;
-            /* Умная адаптивность: ширина зависит либо от экрана (95vw), либо от доступной высоты (100vh минус место под заголовки ~160px) */
-            max-width: min(95vw, calc((100vh - 160px) * 1.75));
-            aspect-ratio: 1792 / 1024; /* Сохраняем пропорции фото */
+            display: flex; /* Контейнер плотно облегает дочернюю картинку */
+            justify-content: center;
+            align-items: center;
             cursor: none; 
         }
 
         #main-image {
             display: block;
-            width: 100%;
-            height: 100%;
+            /* Те самые относительные размеры для идеальной адаптивности: */
+            max-width: 95vw;
+            max-height: 65vh;
+            width: auto;
+            height: auto;
+            /* Картинка сохраняет пропорции 1792 / 1024 благодаря встроенному соотношению сторон */
             user-select: none;
             filter: brightness(60%); 
             border-radius: 16px; 
@@ -140,7 +143,8 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 550px; 
+            /* Увеличенный адаптивный размер камеры: до 550px на ПК и до 90% ширины картинки на смартфонах */
+            width: min(550px, 90%); 
             aspect-ratio: 1792 / 1024;
             pointer-events: none;
             will-change: transform;
@@ -172,7 +176,7 @@
 
         #crosshair {
             position: absolute;
-            top: 56%; /* Опустили прицел чуть ниже (было 50%) */
+            top: 56%; 
             left: 50%;
             transform: translate(-50%, -50%);
             width: 30px;
@@ -197,9 +201,9 @@
             position: absolute;
             z-index: 20;
             top: 20px; 
-            /* Переместили направо, чтобы миникарта не перекрывала сообщение (message-box) */
             right: 20px; 
-            width: 120px; 
+            /* Адаптивный размер миникарты */
+            width: max(80px, 15%); 
             border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 8px;
             overflow: hidden;
@@ -225,7 +229,7 @@
 </head>
 <body>
 
-    <h1>Jungle Photo Safari</h1>
+    <h1>In the jungle</h1>
     <div class="instructions">
         <strong>How to play:</strong> Find the animals and make sentences with <em>this, that, these, those</em>. For example: <em>"This is a monkey."</em>
     </div>
@@ -358,13 +362,16 @@
             let x = clientX - rect.left;
             let y = clientY - rect.top;
 
+            // Ограничиваем координаты границами картинки
             x = Math.max(0, Math.min(x, rect.width));
             y = Math.max(0, Math.min(y, rect.height));
 
+            // Сдвиг самой камеры (сборки) относительно курсора
             const moveX = x - (camW / 2);
             const moveY = y - (camH / 2);
             cameraAssembly.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
 
+            // Обновление фона "экрана" камеры для создания эффекта зума
             const bgWidth = rect.width * ZOOM;
             const bgHeight = rect.height * ZOOM;
             cameraScreen.style.backgroundSize = `${bgWidth}px ${bgHeight}px`;
@@ -377,6 +384,7 @@
             
             cameraScreen.style.backgroundPosition = `${bgPosX}px ${bgPosY}px`;
 
+            // Обновление положения рамки на миникарте
             const scaleX = minimap.offsetWidth / rect.width;
             const scaleY = minimap.offsetHeight / rect.height;
 
@@ -392,12 +400,18 @@
         }
 
         container.addEventListener('mousemove', updateCamera);
-        // Добавлены обработчики для Touch-устройств (с passive: false для preventDefault)
+        // Обработчики для Touch-устройств (с passive: false для работы preventDefault)
         container.addEventListener('touchmove', updateCamera, {passive: false});
         container.addEventListener('touchstart', updateCamera, {passive: false});
         
         window.addEventListener('resize', initCamera);
-        window.onload = initCamera;
+        
+        // Используем событие load на картинке, чтобы гарантировать правильные размеры
+        mainImg.addEventListener('load', initCamera);
+        // Подстраховка: если картинка уже в кеше
+        if (mainImg.complete) {
+            initCamera();
+        }
     </script>
 </body>
 </html>
